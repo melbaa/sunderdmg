@@ -1,7 +1,29 @@
 local ADDON_NAME = "sunderdmg"
 SDMG = {}
 
+function SDMG.spellrank(spellname)
+    local i = 1
+    local rank = nil
+    local name = nil
+    while true do
+        local name_iter, rank_iter = GetSpellName(i, BOOKTYPE_SPELL);
+        if not name_iter then break end
+        if name_iter == spellname then
+            rank = rank_iter
+            name = name_iter
+        end
+        i = i + 1
+    end
+    return name, rank
+end
 
+function SDMG.sunderrank()
+    local name, rank = SDMG.spellrank("Sunder Armor")
+    local a, b, rank = string.find(rank, "Rank (%d)")
+    if not rank then return 0 end
+    rank = tonumber(rank)
+    return rank
+end
 
 
 function SDMG.mitigated(armor)
@@ -15,9 +37,8 @@ function SDMG.mitigated(armor)
 end
 
 
-function SDMG.mitigated2(armor)
+function SDMG.mitigated2(armor, attacker_level)
     if armor < 0 then armor = 0 end
-    local attacker_level = UnitLevel("player")
     local m = 400 + 85 * attacker_level
     local tmpvalue = armor / (armor + m)
     if tmpvalue < 0 then tmpvalue = 0 end
@@ -87,15 +108,21 @@ local function displayString()
     local hp = UnitHealth("target")
     local ap = getAP()
 
-    local armor = UnitResistance("target", 0)
-    local newarmor = armor - 450
-    local newarmor3 = armor - 450 * 3
-    local newarmor5 = armor - 450 * 5
+    local attacker_level = UnitLevel("player")
+    local sunder_power = 450
+    if attacker_level < 60 then
+        sunder_power = SDMG.sunderrank() * 90
+    end
 
-    local mit = SDMG.mitigated2(armor)
-    local newmit = SDMG.mitigated2(newarmor)
-    local newmit3 = SDMG.mitigated2(newarmor3)
-    local newmit5 = SDMG.mitigated2(newarmor5)
+    local armor = UnitResistance("target", 0)
+    local newarmor = armor - sunder_power
+    local newarmor3 = armor - sunder_power * 3
+    local newarmor5 = armor - sunder_power * 5
+
+    local mit = SDMG.mitigated2(armor, attacker_level)
+    local newmit = SDMG.mitigated2(newarmor, attacker_level)
+    local newmit3 = SDMG.mitigated2(newarmor3, attacker_level)
+    local newmit5 = SDMG.mitigated2(newarmor5, attacker_level)
     local ehp = hp * (1+mit)
     local newehp = hp * (1+newmit)
     local newehp3 = hp * (1+newmit3)
@@ -105,9 +132,9 @@ local function displayString()
     -- local result5 = floor(ehp - newehp5)
     local btbasedmg = (0.3 * ap + 150)
     local btdmg = btbasedmg * (1 - mit)
-    return 'mit ' .. floor(mit*1000)/10 .. ' x1 ' .. floor(newmit*1000)/10 .. ' x5 ' .. floor(newmit5*1000)/10
+    return 'mit ' .. floor(mit*1000)/10 .. ' x1: ' .. floor(newmit*1000)/10 .. ' x5: ' .. floor(newmit5*1000)/10
         -- .. '\navgdiff5 ' .. floor(result5/5) .. ' x5 ' .. result5 .. ' dp30rx5 ' ..  floor(result5/5)*3
-        .. '\ndiff ' .. result ..  ' diff30r ' .. floor(result3)
+        .. '\nsunder x1: ' .. result ..  ' x3: ' .. floor(result3)
         .. '\nbtbase ' .. floor(btbasedmg) .. ' btmit ' .. floor(btdmg) 
 end
 
