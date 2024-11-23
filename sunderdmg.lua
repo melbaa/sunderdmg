@@ -19,6 +19,7 @@ end
 
 function SDMG.sunderrank()
     local name, rank = SDMG.spellrank("Sunder Armor")
+    if not rank then return 0 end
     local a, b, rank = string.find(rank, "Rank (%d)")
     if not rank then return 0 end
     rank = tonumber(rank)
@@ -50,7 +51,7 @@ end
 -- Interface
 SDMG.f1 = CreateFrame("Frame",nil,UIParent)
 SDMG.f1:SetMovable(true)
---SDMG.f1:EnableMouse(true)
+SDMG.f1:EnableMouse(true)
 SDMG.f1:SetWidth(100) 
 SDMG.f1:SetHeight(100) 
 SDMG.f1:SetAlpha(.90);
