@@ -131,7 +131,7 @@ local function displayString()
     local result = floor(ehp-newehp)
     local result3 = floor(ehp-newehp3)
     -- local result5 = floor(ehp - newehp5)
-    local btbasedmg = (0.3 * ap + 150)
+    local btbasedmg = (0.35 * ap + 200)
     local btdmg = btbasedmg * (1 - mit)
     return 'mit ' .. floor(mit*1000)/10 .. ' x1: ' .. floor(newmit*1000)/10 .. ' x5: ' .. floor(newmit5*1000)/10
         -- .. '\navgdiff5 ' .. floor(result5/5) .. ' x5 ' .. result5 .. ' dp30rx5 ' ..  floor(result5/5)*3
